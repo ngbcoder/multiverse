@@ -1,0 +1,16 @@
+[package]
+name = "multiverse-firmware"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+multiverse-core = { path = "../core" }
+multiverse-storage = { path = "../storage" }
+serde_json.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+
+[features]
+default = []
+uefi = []

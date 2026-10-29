@@ -1,0 +1,6 @@
+/target
+/crates/uefi-test/target
+*.img
+*.iso
+ovmf.fd
+temp_boot_part.fat

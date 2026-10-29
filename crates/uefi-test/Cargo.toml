@@ -1,0 +1,11 @@
+[package]
+name = "uefi-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+uefi = "0.33"
+
+[profile.release]
+opt-level = "z"
+lto = true

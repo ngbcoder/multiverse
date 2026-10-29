@@ -1,0 +1,20 @@
+{
+  "control": {
+    "menu_mode": "tree",
+    "auto_boot_delay": 5,
+    "timeout": 30
+  },
+  "theme": {
+    "background": "/boot/theme/background.png",
+    "resolution": "1024x768"
+  },
+  "menu_alias": {
+    "ubuntu": "Ubuntu 22.04 LTS"
+  },
+  "menu_tip": {
+    "ubuntu": "Boot Ubuntu Live ISO"
+  },
+  "menu_class": {
+    "ubuntu": "linux"
+  }
+}

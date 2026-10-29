@@ -1,0 +1,11 @@
+[package]
+name = "multiverse-storage"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+multiverse-core = { path = "../core" }
+thiserror.workspace = true
+serde.workspace = true
+uuid.workspace = true
