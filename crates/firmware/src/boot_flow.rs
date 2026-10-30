@@ -38,13 +38,28 @@ pub struct UefiBootFlowConfig {
     pub alternate_sector_size: Option<u32>,
 }
 
-#[derive(Debug)]
+pub type BootDispatchFn = Box<dyn Fn(&str) -> Result<(), CoreError> + Send + Sync>;
+
 pub struct UefiBootFlowManager {
     config: UefiBootFlowConfig,
     env_block: EnvParamBlock,
     var_store: UefiVariableStore,
     virtual_device: Option<VirtualBlockDevice>,
     retries: u32,
+    dispatch_hook: Option<BootDispatchFn>,
+}
+
+impl std::fmt::Debug for UefiBootFlowManager {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("UefiBootFlowManager")
+            .field("config", &self.config)
+            .field("env_block", &self.env_block)
+            .field("var_store", &self.var_store)
+            .field("virtual_device", &self.virtual_device)
+            .field("retries", &self.retries)
+            .field("dispatch_hook", &self.dispatch_hook.is_some())
+            .finish()
+    }
 }
 
 impl UefiBootFlowManager {
@@ -67,7 +82,16 @@ impl UefiBootFlowManager {
             var_store: UefiVariableStore::new(),
             virtual_device: Some(vdev),
             retries: 0,
+            dispatch_hook: None,
         }
+    }
+
+    pub fn with_dispatch_hook<F>(mut self, hook: F) -> Self
+    where
+        F: Fn(&str) -> Result<(), CoreError> + Send + Sync + 'static,
+    {
+        self.dispatch_hook = Some(Box::new(hook));
+        self
     }
 
     pub fn with_ramdisk(mut self, ramdisk: RamdiskParam) -> Self {
@@ -97,7 +121,7 @@ impl UefiBootFlowManager {
         Ok(())
     }
 
-    /// Simulate UEFI LoadImage and StartImage dispatch from virtual block device
+    /// Simulate/Execute UEFI LoadImage and StartImage dispatch from virtual block device
     pub fn load_and_start_image(&self, bootloader_path: &str) -> Result<(), CoreError> {
         if self.virtual_device.is_none() {
             return Err(CoreError::NotFound("virtual block device not initialized".into()));
@@ -105,7 +129,9 @@ impl UefiBootFlowManager {
         if bootloader_path.is_empty() {
             return Err(CoreError::InvalidArg("empty bootloader path".into()));
         }
-        // Hook for UEFI LoadImage / StartImage integration
+        if let Some(hook) = &self.dispatch_hook {
+            hook(bootloader_path)?;
+        }
         Ok(())
     }
 

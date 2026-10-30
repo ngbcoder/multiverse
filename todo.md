@@ -54,7 +54,11 @@ Source: `DESIGN.md` (multi-image bootable storage platform).
 
 ## M6 — UEFI Boot Flow
 - [x] EFI entry point; environment persistence via UEFI variables (image loc, chunk counts, ramdisk params).
-- [x] Boot selected image's EFI bootloader from virtual device (LoadImage/StartImage).
+- [x] Virtual block device dispatches guest bootloader (shim->GRUB) via file-based LoadImage (uefi-test harness).
+- [ ] Install actual UEFI BlockIO protocol for VirtualBlockDevice in firmware.
+- [ ] Connect real disk sector reading in VirtualBlockDevice::read_blocks.
+- [ ] Wire dynamic ISO/image discovery (bootcore) and file extent chunk mapping (storage) into UEFI application.
+- [ ] Boot selected image's EFI bootloader from virtual device (LoadImage/StartImage).
 - [x] Fallback retry with flags (disable vdev opts, alternate sector size).
 - [x] Cleanup/restore on return.
 

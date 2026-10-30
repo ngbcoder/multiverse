@@ -1,0 +1,39 @@
+MainWindow Run Error: TTM_ADDTOOL failed
+
+Stack:
+goroutine 1 [running, locked to thread]:
+runtime/debug.Stack()
+	C:/Users/29bragann/Documents/Software/sdks/go/src/runtime/debug/stack.go:26 +0x5e
+github.com/lxn/walk.newErr(...)
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/error.go:81
+github.com/lxn/walk.newError({0x7ff6ee97ea81, 0x12})
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/error.go:85 +0x25
+github.com/lxn/walk.(*ToolTip).addTool(0x207aa28a7b8?, 0x7ff6eec80038?, 0x8?)
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/tooltip.go:184 +0x8e
+github.com/lxn/walk.(*ToolTip).AddTool(0x238e981a4288, {0x7ff6eec80038?, 0x238e981cc708?})
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/tooltip.go:160 +0x34
+github.com/lxn/walk.(*WidgetBase).init(0x238e981cc708, {0x7ff6eebf46d0?, 0x7ff6ee984203?})
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/widget.go:137 +0x114
+github.com/lxn/walk.initWindowWithCfg(0x238e981c3940)
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/window.go:670 +0x61a
+github.com/lxn/walk.InitWindow(...)
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/window.go:538
+github.com/lxn/walk.InitWidget({0x7ff6eec80038, 0x238e981cc708}, {0x7ff6eec7bd70, 0x238e981ae008}, {0x7ff6ee984203?, 0x1c?}, 0x50000000?, 0x10000?)
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/widget.go:110 +0xf8
+github.com/lxn/walk.NewCompositeWithStyle({0x7ff6eec7bd70, 0x238e981ae008}, 0x0)
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/composite.go:30 +0xc6
+github.com/lxn/walk.NewComposite(...)
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/composite.go:45
+github.com/lxn/walk.(*FormBase).init(0x238e981ae008, {0x207ef745d28, 0x238e981ae008})
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/form.go:107 +0x69
+github.com/lxn/walk.initWindowWithCfg(0x238e981c3c28)
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/window.go:662 +0x57a
+github.com/lxn/walk.NewMainWindowWithCfg(0x238e97fe9f70)
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/mainwindow.go:48 +0x11a
+github.com/lxn/walk/declarative.MainWindow.Create({{{0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, ...}, ...})
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/declarative/mainwindow.go:64 +0x13e
+github.com/lxn/walk/declarative.MainWindow.Run({{{0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, {0x0, 0x0}, ...}, ...})
+	C:/Users/29bragann/go/pkg/mod/github.com/lxn/walk@v0.0.0-20210112085537-c389da54e794/declarative/mainwindow.go:209 +0x8d
+main.main()
+	C:/Users/29bragann/StudioProjects/Multiverse/installer_go/main.go:141 +0x74d
+

@@ -2,13 +2,28 @@ use multiverse_core::CoreError;
 use multiverse_core::chunkmap::{ChunkMap, ReadSource};
 use multiverse_core::constants as core_constants;
 
-#[derive(Debug)]
+pub type DiskReaderFn = Box<dyn Fn(u64, u64, &mut [u8]) -> Result<(), CoreError> + Send + Sync>;
+
 pub struct VirtualBlockDevice {
     pub chunk_map: ChunkMap,
     pub media_id: u32,
     pub read_only: bool,
     pub removable: bool,
     pub block_size: u32, // disk sector size
+    pub disk_reader: Option<DiskReaderFn>,
+}
+
+impl std::fmt::Debug for VirtualBlockDevice {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("VirtualBlockDevice")
+            .field("chunk_map", &self.chunk_map)
+            .field("media_id", &self.media_id)
+            .field("read_only", &self.read_only)
+            .field("removable", &self.removable)
+            .field("block_size", &self.block_size)
+            .field("disk_reader", &self.disk_reader.is_some())
+            .finish()
+    }
 }
 
 impl VirtualBlockDevice {
@@ -20,7 +35,16 @@ impl VirtualBlockDevice {
             read_only: true,
             removable: true,
             block_size: bs,
+            disk_reader: None,
         }
+    }
+
+    pub fn with_disk_reader<F>(mut self, reader: F) -> Self
+    where
+        F: Fn(u64, u64, &mut [u8]) -> Result<(), CoreError> + Send + Sync + 'static,
+    {
+        self.disk_reader = Some(Box::new(reader));
+        self
     }
 
     /// Read `count` blocks starting at `lba` (in disk sector units) into `buf`.
@@ -36,11 +60,13 @@ impl VirtualBlockDevice {
         for op in ops {
             match op.source {
                 ReadSource::Disk => {
-                    // Caller would perform actual disk read using op.disk_lba/count.
-                    // Here we leave zeros; real impl fills from disk.
                     let bytes = op.image_sector_count * self.chunk_map.image_sector_size as u64;
-                    for b in &mut buf[pos..pos + bytes as usize] {
-                        *b = 0;
+                    if let Some(reader) = &self.disk_reader {
+                        reader(op.disk_lba, op.image_sector_count, &mut buf[pos..pos + bytes as usize])?;
+                    } else {
+                        for b in &mut buf[pos..pos + bytes as usize] {
+                            *b = 0;
+                        }
                     }
                     pos += bytes as usize;
                 }

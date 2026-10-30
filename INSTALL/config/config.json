@@ -9,12 +9,30 @@
     "resolution": "1024x768"
   },
   "menu_alias": {
-    "ubuntu": "Ubuntu 22.04 LTS"
+    "ubuntu.iso": "Ubuntu 22.04 LTS",
+    "debian.iso": "Debian 12 Bookworm",
+    "fedora.iso": "Fedora 40 Workstation",
+    "arch.iso": "Arch Linux",
+    "win11.iso": "Windows 11 Enterprise PE",
+    "win10.iso": "Windows 10 Setup",
+    "freebsd.iso": "FreeBSD 14.0 RELEASE"
   },
   "menu_tip": {
-    "ubuntu": "Boot Ubuntu Live ISO"
+    "ubuntu.iso": "Boot Ubuntu Live ISO",
+    "debian.iso": "Boot Debian GNU/Linux",
+    "fedora.iso": "Boot Fedora Workstation",
+    "arch.iso": "Boot Arch Linux Live",
+    "win11.iso": "Boot Windows 11 PE Environment",
+    "win10.iso": "Boot Windows 10 Installer",
+    "freebsd.iso": "Boot FreeBSD Unix"
   },
   "menu_class": {
-    "ubuntu": "linux"
+    "ubuntu.iso": "linux",
+    "debian.iso": "linux",
+    "fedora.iso": "linux",
+    "arch.iso": "linux",
+    "win11.iso": "windows",
+    "win10.iso": "windows",
+    "freebsd.iso": "unix"
   }
 }
