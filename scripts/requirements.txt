@@ -1,0 +1,3 @@
+# Python dependencies for the project scripts
+# scripts/installer_gui.py uses customtkinter for the GUI
+customtkinter>=5.2.0

@@ -1,8 +1,30 @@
 #!/usr/bin/env python3
 import os
+import shutil
 import subprocess
 import sys
 import math
+
+
+def find_mkfs_fat():
+    candidates = [
+        "mkfs.fat",
+        "mkfs.vfat",
+        "/usr/sbin/mkfs.fat",
+        "/usr/bin/mkfs.fat",
+        "/sbin/mkfs.fat",
+        "C:/msys64/usr/bin/mkfs.fat.exe",
+    ]
+    for candidate in candidates:
+        if os.path.isabs(candidate):
+            if os.path.exists(candidate):
+                return candidate
+        else:
+            resolved = shutil.which(candidate)
+            if resolved:
+                return resolved
+    return None
+
 
 def main():
     print("Building Multiverse bootable disk image (multiverse_disk.img)...")
@@ -48,9 +70,13 @@ def main():
         f.write(b"\x00" * (size_mb * 1024 * 1024))
 
     # 2. Format as FAT32 using mkfs.fat
-    mkfs_path = "C:/msys64/usr/bin/mkfs.fat.exe"
-    if not os.path.exists(mkfs_path):
-        mkfs_path = "mkfs.fat"
+    mkfs_path = find_mkfs_fat()
+    if mkfs_path is None:
+        raise FileNotFoundError(
+            "mkfs.fat is not installed or not on PATH. "
+            "Install the dosfstools package (Linux: 'sudo apt-get install dosfstools' or 'sudo dnf install dosfstools') "
+            "and rerun this script."
+        )
 
     res = subprocess.run([mkfs_path, "-F", "32", "-I", img_path], capture_output=True, text=True)
     if res.returncode != 0:
