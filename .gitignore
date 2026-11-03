@@ -1,6 +1,8 @@
 /target
 /crates/uefi-test/target
 /.idea
+/multiverse/
+/multiverse_iso_*/
 *.img
 *.iso
 ovmf.fd
