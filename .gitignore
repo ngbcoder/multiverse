@@ -1,5 +1,6 @@
 /target
 /crates/uefi-test/target
+/.idea
 *.img
 *.iso
 ovmf.fd
