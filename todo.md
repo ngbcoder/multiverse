@@ -55,10 +55,10 @@ Source: `DESIGN.md` (multi-image bootable storage platform).
 ## M6 — UEFI Boot Flow
 - [x] EFI entry point; environment persistence via UEFI variables (image loc, chunk counts, ramdisk params).
 - [x] Virtual block device dispatches guest bootloader (shim->GRUB) via file-based LoadImage (uefi-test harness).
-- [ ] Install actual UEFI BlockIO protocol for VirtualBlockDevice in firmware.
-- [ ] Connect real disk sector reading in VirtualBlockDevice::read_blocks.
-- [ ] Wire dynamic ISO/image discovery (bootcore) and file extent chunk mapping (storage) into UEFI application.
-- [ ] Boot selected image's EFI bootloader from virtual device (LoadImage/StartImage).
+- [x] Install actual UEFI BlockIO protocol for VirtualBlockDevice in firmware.
+- [x] Connect real disk sector reading in VirtualBlockDevice::read_blocks.
+- [x] Wire dynamic ISO/image discovery (bootcore) and file extent chunk mapping (storage) into UEFI application.
+- [x] Boot selected image's EFI bootloader from virtual device (LoadImage/StartImage).
 - [x] Fallback retry with flags (disable vdev opts, alternate sector size).
 - [x] Cleanup/restore on return.
 
@@ -103,4 +103,12 @@ Source: `DESIGN.md` (multi-image bootable storage platform).
 - [ ] Plugin registration API (name + check + entry, priority order).
 - [ ] New-OS / new-FS / new-arch / new-image-format extension points documented.
 - [ ] Config schema versioning + migration.
+
+## M13 — GUI & User Experience
+- [ ] Boot menu GUI: themed list/tree view, icons, tooltips, keyboard/mouse navigation.
+- [x] Configurator web UI: local HTTP server + forms for editing config.json, validation, backups.
+- [ ] Installer GUI: drive enumeration, validation, partition creation/format, payload writing, upgrade in place, dry-run/force.
+- [ ] Linux GTK/Qt installer frontends (optional).
+- [ ] i18n for menus and GUI (language files).
+- [ ] Accessibility: high-contrast themes, scalable fonts, keyboard-only operation.
 ```

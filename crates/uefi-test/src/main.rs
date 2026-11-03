@@ -10,6 +10,7 @@ use uefi::proto::console::text::{Color, Key, ScanCode};
 static GLOBAL: uefi::allocator::Allocator = uefi::allocator::Allocator;
 
 mod discovered_isos;
+mod iso9660;
 
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
@@ -139,6 +140,52 @@ fn find_pe_efi_candidates(buf: &[u8]) -> alloc::vec::Vec<alloc::vec::Vec<u8>> {
     out
 }
 
+fn read_iso_efi_candidates_bytes(buf: &[u8]) -> alloc::vec::Vec<alloc::vec::Vec<u8>> {
+    let mut result = alloc::vec::Vec::new();
+    let sector_size = 2048u64;
+
+    // 1. Read sector 17 (El Torito Boot Record)
+    let boot_rec_off = 17 * sector_size as usize;
+    if buf.len() >= boot_rec_off + 2048 {
+        let boot_rec = &buf[boot_rec_off..boot_rec_off + 2048];
+        if &boot_rec[1..6] == b"CD001" {
+            let catalog_lba = u32::from_le_bytes(boot_rec[0x47..0x4B].try_into().unwrap_or([0; 4])) as u64;
+            let cat_off = (catalog_lba * sector_size) as usize;
+            if cat_off + 2048 <= buf.len() {
+                let catalog = &buf[cat_off..cat_off + 2048];
+                if catalog[0] == 0x01 && catalog[0x1E] == 0x55 && catalog[0x1F] == 0xAA {
+                    let mut idx = 32usize;
+                    while idx + 32 <= catalog.len() {
+                        let entry = &catalog[idx..idx + 32];
+                        let boot_ind = entry[0];
+                        let media_type = entry[1];
+                        let lba = u32::from_le_bytes(entry[8..12].try_into().unwrap_or([0; 4])) as u64;
+                        let sec_cnt = u16::from_le_bytes(entry[6..8].try_into().unwrap_or([0; 2])) as usize;
+                        if (boot_ind == 0x88 || media_type == 0xEF) && lba > 0 {
+                            let fat_off = (lba * sector_size) as usize;
+                            let fat_len = if sec_cnt > 0 { sec_cnt * 512 } else { 8 * 1024 * 1024 };
+                            if fat_off + fat_len <= buf.len() {
+                                let fat_buf = &buf[fat_off..fat_off + fat_len];
+                                let cands = find_pe_efi_candidates(fat_buf);
+                                for c in cands { result.push(c); }
+                            }
+                        }
+                        idx += 32;
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. Fallback: scan initial 16MB buffer for PE/COFF header
+    if result.is_empty() {
+        let scan_len = (16 * 1024 * 1024).min(buf.len());
+        let cands = find_pe_efi_candidates(&buf[..scan_len]);
+        for c in cands { result.push(c); }
+    }
+    result
+}
+
 fn read_iso_efi_candidates(path: &CStr16) -> alloc::vec::Vec<alloc::vec::Vec<u8>> {
     let mut result = alloc::vec::Vec::new();
     let handles = match uefi::boot::find_handles::<SimpleFileSystem>() {
@@ -202,6 +249,18 @@ fn read_iso_efi_candidates(path: &CStr16) -> alloc::vec::Vec<alloc::vec::Vec<u8>
         }
     }
     result
+}
+
+fn read_iso_efi_candidates_cdrom(name: &str) -> alloc::vec::Vec<alloc::vec::Vec<u8>> {
+    let path = alloc::format!("\\IMAGES\\{}", name);
+    if let Some(data) = iso9660::read_cdrom_file(&path) {
+        return read_iso_efi_candidates_bytes(&data);
+    }
+    // try without IMAGES prefix
+    if let Some(data) = iso9660::read_cdrom_file(name) {
+        return read_iso_efi_candidates_bytes(&data);
+    }
+    alloc::vec::Vec::new()
 }
 
 fn draw_menu(selected_idx: usize) {
@@ -306,7 +365,11 @@ fn main() -> Status {
                         });
 
                         for path in paths {
-                            let cands = read_iso_efi_candidates(path);
+                            let mut cands = read_iso_efi_candidates(path);
+                            if cands.is_empty() {
+                                let name = alloc::format!("{}", path);
+                                cands = read_iso_efi_candidates_cdrom(&name);
+                            }
                             for efi_bytes in cands {
                                 uefi::system::with_stdout(|stdout| {
                                     let _ = stdout.set_color(Color::LightGreen, Color::Black);

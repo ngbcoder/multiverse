@@ -1,4 +1,3 @@
-pub const DISCOVERED_ISOS: &[&str] = &[
-    "Ubuntu 22.04 LTS (Default)",
-    "Debian 12 Bookworm (Default)",
+﻿pub const DISCOVERED_ISOS: &[&str] = &[
+    "Fedora-KDE-Desktop-Live-44-1.7.x86_64.iso",
 ];

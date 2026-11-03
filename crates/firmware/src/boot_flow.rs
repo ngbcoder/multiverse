@@ -64,13 +64,13 @@ impl std::fmt::Debug for UefiBootFlowManager {
 
 impl UefiBootFlowManager {
     pub fn new(platform_id: PlatformId, chunk_map: ChunkMap) -> Self {
-        let vdev = VirtualBlockDevice::new(chunk_map);
+        let vdev = VirtualBlockDevice::new(chunk_map.clone());
         let env_block = EnvParamBlock {
-            image_location: Some(2048),
-            chunk_count: 1,
+            image_location: Some(chunk_map.chain_head.start_sector),
+            chunk_count: chunk_map.chain_head.chunk_count,
             platform_id: Some(platform_id),
-            ramdisk: None,
-            flags: 0,
+            ramdisk: chunk_map.ramdisk.clone(),
+            flags: chunk_map.chain_head.flags,
         };
         Self {
             config: UefiBootFlowConfig {
@@ -109,6 +109,41 @@ impl UefiBootFlowManager {
 
     pub fn virtual_device(&self) -> Option<&VirtualBlockDevice> {
         self.virtual_device.as_ref()
+    }
+
+    pub fn virtual_device_mut(&mut self) -> Option<&mut VirtualBlockDevice> {
+        self.virtual_device.as_mut()
+    }
+
+    pub fn set_virtual_device(&mut self, device: VirtualBlockDevice) {
+        self.virtual_device = Some(device);
+    }
+
+    pub fn build_virtual_device(&mut self, chunk_map: ChunkMap) {
+        let vdev = VirtualBlockDevice::new(chunk_map);
+        self.virtual_device = Some(vdev);
+    }
+
+    pub fn install_block_io_protocol(&self) -> Result<crate::uefi_blockio::BlockIoProtocol, CoreError> {
+        let vdev = self.virtual_device.clone().ok_or_else(|| CoreError::NotFound("virtual block device not initialized".into()))?;
+        Ok(crate::uefi_blockio::BlockIoProtocol::new(vdev))
+    }
+
+    pub fn boot_efi_bootloader(&mut self, bootloader_path: &str) -> Result<(), CoreError> {
+        self.execute_boot_sequence(bootloader_path)
+    }
+
+    pub fn load_image_from_virtual_device(&self, bootloader_path: &str) -> Result<(), CoreError> {
+        self.load_and_start_image(bootloader_path)
+    }
+
+    pub fn boot_selected_image(&mut self, bootloader_path: &str) -> Result<(), CoreError> {
+        self.execute_boot_sequence(bootloader_path)
+    }
+
+    pub fn prepare_image_boot(&mut self, chunk_map: ChunkMap, bootloader_path: &str) -> Result<(), CoreError> {
+        self.virtual_device = Some(VirtualBlockDevice::new(chunk_map));
+        self.execute_boot_sequence(bootloader_path)
     }
 
     pub fn prepare_boot(&mut self) -> Result<(), CoreError> {
